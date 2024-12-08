@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::collections::BTreeMap;
 use std::fs::read_to_string;
 
 fn parse_input(input: &str) {
     let rules_and_updates: Vec<String> = input.split("\n\n").map(|s| s.to_string()).collect();
-    println!("{:?}", rules_and_updates);
+    //println!("{:?}", rules_and_updates);
     let rules: Vec<Vec<i32>> = rules_and_updates
         .get(0)
         .unwrap()
@@ -21,7 +22,7 @@ fn parse_input(input: &str) {
             .and_modify(|v| v.push(*right))
             .or_insert(vec![*right]);
     }
-    println!("rules_map {:?}", rules_map);
+    //println!("rules_map {:?}", rules_map);
 
     let updates: Vec<Vec<i32>> = rules_and_updates
         .get(1)
@@ -36,7 +37,7 @@ fn parse_input(input: &str) {
             num_set.insert(num);
         }
     }
-    println!("num set {:?}", num_set);
+    //println!("num set {:?}", num_set);
     let num_vec: Vec<i32> = num_set.clone().into_iter().collect();
     let mut num_count_map: HashMap<i32, i32> = HashMap::new();
     for i in 0..num_vec.len() {
@@ -50,6 +51,21 @@ fn parse_input(input: &str) {
         }
     }
     println!("num_count_map {:?}", num_count_map);
+    //let mut sorted_counts: Vec<_> = num_count_map.into_values().collect::<Vec<_>>();
+    //sorted_counts.sort();
+    //println!("sorted_counts {:?}", sorted_counts);
+    //for v in sorted_counts {
+    //    num_count_map.iter()
+    //        .filter_map(|(key, &val)| if val == v { Some(key) } else { None })
+    //        .collect();
+    //}
+    let mut sort_nums: BTreeMap<i32, i32> = BTreeMap::new();
+    for (k,v) in num_count_map {
+        sort_nums.insert(v, k);
+
+    }
+    println!("sort_nums {:?}", sort_nums);
+
 }
 
 fn task1(input: &str) -> i32 {
@@ -61,8 +77,8 @@ fn task2(input: &str) -> i32 {
 }
 
 fn main() {
-    //let file_path = "../inputs/aoc_05.txt";
-    let file_path = "test_input.txt";
+    let file_path = "../inputs/aoc_05.txt";
+    //let file_path = "test_input.txt";
 
     let raw_input: String =
         read_to_string(file_path).expect("Should have been able to read the file");
