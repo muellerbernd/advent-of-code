@@ -99,7 +99,7 @@ fn task1(updates: &Vec<Vec<i32>>, rules_map: &HashMap<i32, Vec<i32>>) -> i32 {
         let mut is_ordered: bool = true;
         for i in 0..update.len() {
             let lhs = update.get(i).unwrap();
-            for j in i + 1..update.len() {
+            for j in (i + 1)..update.len() {
                 let rhs = update.get(j).unwrap();
                 if !check_order(*lhs, *rhs, rules_map) {
                     is_ordered = false;
@@ -124,8 +124,8 @@ fn task2(input: &str) -> i32 {
 }
 
 fn main() {
-    let file_path = "../inputs/aoc_05.txt";
-    //let file_path = "test_input.txt";
+    //let file_path = "../inputs/aoc_05.txt";
+    let file_path = "test_input.txt";
 
     let raw_input: String =
         read_to_string(file_path).expect("Should have been able to read the file");
