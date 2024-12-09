@@ -67,11 +67,10 @@ fn parse_input(input: &str) -> (Vec<Vec<i32>>, HashMap<i32, Vec<i32>>) {
     (updates, rules_map)
 }
 
-fn task1(updates: &Vec<Vec<i32>>, rules_map: &HashMap<i32, Vec<i32>>) -> i32 {
-    println!("rules_map {:?}", rules_map);
+fn task1(updates: Vec<Vec<i32>>, rules_map: HashMap<i32, Vec<i32>>) -> i32 {
     let mut middle_pages_sum = 0;
     let mut ordered_counter = 0;
-    for update in updates {
+    for update in &updates {
         let mut is_in_invalid_order: bool = false;
         for i in 0..update.len() {
             let lhs = update.get(i).unwrap();
@@ -80,16 +79,12 @@ fn task1(updates: &Vec<Vec<i32>>, rules_map: &HashMap<i32, Vec<i32>>) -> i32 {
                 if rules_map.contains_key(rhs) && rules_map.get(rhs).unwrap().contains(lhs) {
                     is_in_invalid_order = true;
                 }
-                //if !check_order(*lhs, *rhs, rules_map) {
-                //    invalid_order = false;
-                //    break;
-                //}
             }
         }
-        println!("{:?} is_ordered {}", update, is_in_invalid_order);
+        //println!("{:?} is_ordered {}", update, is_in_invalid_order);
         if !is_in_invalid_order {
             //println!("{:?} is_ordered {}", update, is_ordered);
-            println!("middle page {:?}", update.get(update.len() / 2).unwrap());
+            //println!("middle page {:?}", update.get(update.len() / 2).unwrap());
             middle_pages_sum += update.get(update.len() / 2).unwrap();
             ordered_counter += 1;
         }
@@ -102,8 +97,37 @@ fn task1(updates: &Vec<Vec<i32>>, rules_map: &HashMap<i32, Vec<i32>>) -> i32 {
     middle_pages_sum
 }
 
-fn task2(input: &str) -> i32 {
-    6
+fn task2(updates: Vec<Vec<i32>>, rules_map: HashMap<i32, Vec<i32>>) -> i32 {
+    let mut middle_pages_sum = 0;
+    let mut ordered_counter = 0;
+    for u in 0..updates.len() {
+        let mut update: Vec<i32> = updates.get(u).unwrap().to_vec();
+        let mut is_in_invalid_order: bool = false;
+        for i in 0..update.len() {
+            let mut lhs = update.get(i).unwrap().clone();
+            for j in (i + 1)..update.len() {
+                let rhs = update.get(j).unwrap().clone();
+                if rules_map.contains_key(&rhs) && rules_map.get(&rhs).unwrap().contains(&lhs) {
+                    is_in_invalid_order = true;
+                    update.swap(i, j);
+                    lhs = rhs.clone();
+                }
+            }
+        }
+        //println!("{:?} is_ordered {}", update, is_in_invalid_order);
+        if is_in_invalid_order {
+            //println!("{:?} is_ordered {}", update, is_ordered);
+            //println!("middle page {:?}", update.get(update.len() / 2).unwrap());
+            middle_pages_sum += update.get(update.len() / 2).unwrap();
+            ordered_counter += 1;
+        }
+    }
+    println!(
+        "ordered_counter {:?} vs {:?}",
+        ordered_counter,
+        updates.len()
+    );
+    middle_pages_sum
 }
 
 fn main() {
@@ -114,8 +138,8 @@ fn main() {
         read_to_string(file_path).expect("Should have been able to read the file");
 
     let (updates, rules_map) = parse_input(&raw_input);
-    let task1_solution = task1(&updates, &rules_map);
+    let task1_solution = task1(updates.clone(), rules_map.clone());
     println!("task1 solution is {}", task1_solution);
-    //let task2_solution = task2(&raw_input);
-    //println!("task2 solution is {}", task2_solution);
+    let task2_solution = task2(updates.clone(), rules_map.clone());
+    println!("task2 solution is {}", task2_solution);
 }
