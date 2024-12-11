@@ -21,10 +21,18 @@ fn parse_input(input: &str) -> ((usize, usize), Vec<Vec<bool>>) {
     (start_point, obstacle_map)
 }
 
-fn task1(start_point: (usize, usize), obstacle_map: Vec<Vec<bool>>) -> i32 {
+fn task1(start_point: (usize, usize), mut obstacle_map: Vec<Vec<bool>>) -> i32 {
     println!("{:?}", start_point);
     println!("{:?}", obstacle_map);
+    let mut curr_point: (usize, usize) = start_point;
     let directions: Vec<(i8, i8)> = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
+    let grid_width: usize = obstacle_map[0].len();
+    let grid_height: usize = obstacle_map.len();
+    while curr_point.0 > 0
+        && curr_point.0 < grid_height
+        && curr_point.1 > 0
+        && curr_point.1 < grid_width
+    {}
     5
 }
 //fn task2(updates: Vec<Vec<i32>>, rules_map: HashMap<i32, Vec<i32>>) -> i32 {
