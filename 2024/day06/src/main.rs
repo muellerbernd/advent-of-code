@@ -11,7 +11,7 @@ fn parse_input(input: &str) -> ((usize, usize), Vec<(i32, i32)>) {
                     start_point.0 = i;
                     start_point.1 = j
                 }
-                _ => println!("unknown char {}", c),
+                _ => continue,
             }
         }
     }
@@ -24,7 +24,6 @@ fn task1(start_point: (usize, usize), obstacle_list: Vec<(i32, i32)>, length: i3
     let mut dir_ind = 0;
     let mut traversed_grid: Vec<Vec<bool>> = vec![vec![false; length as usize]; length as usize];
     loop {
-        println!("{:?}", (x, y));
         traversed_grid[x as usize][y as usize] = true;
         let (next_x, next_y) = (x + directions[dir_ind].0, y + directions[dir_ind].1);
         if next_x >= length || next_x < 0 || next_y >= length || next_y < 0 {
@@ -36,22 +35,10 @@ fn task1(start_point: (usize, usize), obstacle_list: Vec<(i32, i32)>, length: i3
             (x, y) = (next_x, next_y)
         }
     }
-    //for l in traversed_grid.iter() {
-    //    println!("{:?}", l);
-    //}
-    //traversed_grid
-    //    .iter()
-    //    .map(|v| v.iter().map(|v| *v as i32).sum::<i32>())
-    //    .sum()
-    let mut result = 0;
-    for l in traversed_grid.iter() {
-        for v in l.iter() {
-            if *v {
-                result += 1;
-            }
-        }
-    }
-    result
+    traversed_grid
+        .iter()
+        .map(|v| v.iter().map(|v| *v as i32).sum::<i32>())
+        .sum()
 }
 //fn task2(updates: Vec<Vec<i32>>, rules_map: HashMap<i32, Vec<i32>>) -> i32 {
 //}
