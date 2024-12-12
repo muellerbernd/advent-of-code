@@ -18,13 +18,22 @@ fn parse_input(input: &str) -> ((usize, usize), Vec<(i32, i32)>) {
     (start_point, obstacle_list)
 }
 
-fn task1(start_point: (usize, usize), obstacle_list: Vec<(i32, i32)>, length: i32) -> i32 {
+fn task1(
+    start_point: (usize, usize),
+    obstacle_list: Vec<(i32, i32)>,
+    length: i32,
+) -> (i32, Vec<(usize, usize)>) {
     let (mut x, mut y): (i32, i32) = (start_point.0 as i32, start_point.1 as i32);
     let directions: Vec<(i32, i32)> = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
     let mut dir_ind = 0;
     let mut traversed_grid: Vec<Vec<bool>> = vec![vec![false; length as usize]; length as usize];
+    let mut traversed_indices: Vec<(usize, usize)> = Vec::new();
     loop {
+        let idx = (x as usize, y as usize);
         traversed_grid[x as usize][y as usize] = true;
+        if !(traversed_indices.contains(&idx)) {
+            traversed_indices.push(idx);
+        }
         let (next_x, next_y) = (x + directions[dir_ind].0, y + directions[dir_ind].1);
         if next_x >= length || next_x < 0 || next_y >= length || next_y < 0 {
             break;
@@ -35,39 +44,45 @@ fn task1(start_point: (usize, usize), obstacle_list: Vec<(i32, i32)>, length: i3
             (x, y) = (next_x, next_y)
         }
     }
-    traversed_grid
-        .iter()
-        .map(|v| v.iter().map(|v| *v as i32).sum::<i32>())
-        .sum()
+    (
+        traversed_grid
+            .iter()
+            .map(|v| v.iter().map(|v| *v as i32).sum::<i32>())
+            .sum(),
+        traversed_indices,
+    )
 }
 
-fn task2(start_point: (usize, usize), obstacle_list: Vec<(i32, i32)>, length: i32) -> i32 {
+fn task2(
+    start_point: (usize, usize),
+    obstacle_list: Vec<(i32, i32)>,
+    length: i32,
+    traversed_indices: Vec<(usize, usize)>,
+) -> i32 {
     let directions: Vec<(i32, i32)> = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
     let mut loop_counter: i32 = 0;
-    for i in 0..length {
-        for j in 0..length {
-            let (mut x, mut y): (i32, i32) = (start_point.0 as i32, start_point.1 as i32);
-            let mut new_obstacle_list = obstacle_list.clone();
-            new_obstacle_list.push((i, j));
-            let mut dir_ind = 0;
-            let mut traversed_grid_directions: Vec<Vec<Vec<bool>>> =
-                vec![vec![vec![false; directions.len()]; length as usize]; length as usize];
-            loop {
-                if traversed_grid_directions[x as usize][y as usize][dir_ind as usize] {
-                    loop_counter += 1;
-                    break;
-                } else {
-                    traversed_grid_directions[x as usize][y as usize][dir_ind as usize] = true;
-                }
-                let (next_x, next_y) = (x + directions[dir_ind].0, y + directions[dir_ind].1);
-                if next_x >= length || next_x < 0 || next_y >= length || next_y < 0 {
-                    break;
-                }
-                if new_obstacle_list.contains(&(next_x, next_y)) {
-                    dir_ind = (dir_ind + 1) % 4
-                } else {
-                    (x, y) = (next_x, next_y)
-                }
+    for (i, j) in traversed_indices.iter() {
+        let (mut x, mut y): (i32, i32) = (start_point.0 as i32, start_point.1 as i32);
+        let mut new_obstacle_list = obstacle_list.clone();
+        new_obstacle_list.push((*i as i32, *j as i32));
+        let mut dir_ind = 0;
+        let mut traversed_grid_directions: Vec<Vec<Vec<bool>>> =
+            vec![vec![vec![false; directions.len()]; length as usize]; length as usize];
+        loop {
+            if traversed_grid_directions[x as usize][y as usize][dir_ind as usize] {
+                loop_counter += 1;
+                break;
+            } else {
+                traversed_grid_directions[x as usize][y as usize][dir_ind as usize] = true;
+            }
+            let (next_x, next_y) = (x + directions[dir_ind].0, y + directions[dir_ind].1);
+            if next_x >= length || next_x < 0 || next_y >= length || next_y < 0 {
+                break;
+            }
+            if new_obstacle_list.contains(&(next_x, next_y)) {
+                dir_ind = (dir_ind + 1) % 4
+            } else {
+                (x, y) = (next_x, next_y)
             }
         }
     }
@@ -82,7 +97,7 @@ fn main() {
         read_to_string(file_path).expect("Should have been able to read the file");
 
     let (start_point, obstacle_list) = parse_input(&raw_input);
-    let task1_solution = task1(
+    let (task1_solution, traversed_indices) = task1(
         start_point,
         obstacle_list.clone(),
         raw_input.lines().count() as i32,
@@ -92,6 +107,7 @@ fn main() {
         start_point,
         obstacle_list.clone(),
         raw_input.lines().count() as i32,
+        traversed_indices,
     );
     println!("task2 solution is {}", task2_solution);
 }
