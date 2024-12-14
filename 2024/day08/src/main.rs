@@ -44,20 +44,19 @@ fn task1(
     grid_height: usize,
     grid_width: usize,
 ) -> usize {
-    println!("{:?}", antenna_map);
-    println!("height {:?} width {}", grid_height, grid_width);
-    let antenna_grid_points: Vec<Antenna> = antenna_map.values().flatten().map(|a| *a).collect::<Vec<Antenna>>();
+    let antenna_grid_points: Vec<Antenna> = antenna_map
+        .values()
+        .flatten()
+        .map(|a| *a)
+        .collect::<Vec<Antenna>>();
     let mut antinode_grid_points: Vec<Antenna> = Vec::new();
     let mut final_grid: Vec<Vec<char>> = vec![vec!['.'; grid_width]; grid_height];
     for (k, v) in antenna_map.iter() {
-        println!("k:{} v:{:?}", k, v);
         for i in 0..v.iter().len() {
             let a0: Antenna = v[i];
             for j in i + 1..v.iter().len() {
                 let a1: Antenna = v[j];
-                println!("antenna0 {:?} antenna_1 {:?}", a0, a1);
                 let (delta_x, delta_y) = get_antenna_delta(a0, a1);
-                println!("delta_x {:?} delta_y {:?}", delta_x, delta_y);
                 let antinode0: Antenna = Antenna {
                     x: (a0.x as i32 + delta_x),
                     y: (a0.y as i32 + delta_y),
@@ -101,9 +100,76 @@ fn task1(
     antinode_grid_points.len()
 }
 
-//fn task2(test_values: &Vec<u64>, numbrs: &Vec<Vec<u64>>) -> u64 {
-//    5
-//}
+fn task2(
+    antenna_map: &HashMap<char, Vec<Antenna>>,
+    grid_height: usize,
+    grid_width: usize,
+) -> usize {
+    let antenna_grid_points: Vec<Antenna> = antenna_map
+        .values()
+        .flatten()
+        .map(|a| *a)
+        .collect::<Vec<Antenna>>();
+    let mut antinode_grid_points: Vec<Antenna> = Vec::new();
+    let mut final_grid: Vec<Vec<char>> = vec![vec!['.'; grid_width]; grid_height];
+    for (k, v) in antenna_map.iter() {
+        for i in 0..v.iter().len() {
+            let a0: Antenna = v[i];
+            let antinode: Antenna = Antenna {
+                x: (a0.x),
+                y: (a0.y),
+                name: ('#'),
+            };
+            if !antinode_grid_points.contains(&antinode) {
+                antinode_grid_points.push(antinode);
+            }
+            for j in i + 1..v.iter().len() {
+                let a1: Antenna = v[j];
+                let (delta_x, delta_y) = get_antenna_delta(a0, a1);
+                for p in 0..=grid_height {
+                    let antinode0: Antenna = Antenna {
+                        x: (a0.x as i32 + ((p + 1) as i32 * delta_x)),
+                        y: (a0.y as i32 + ((p + 1) as i32 * delta_y)),
+                        name: ('#'),
+                    };
+                    let antinode1: Antenna = Antenna {
+                        x: (a1.x as i32 - ((p + 1) as i32 * delta_x)),
+                        y: (a1.y as i32 - ((p + 1) as i32 * delta_y)),
+                        name: ('#'),
+                    };
+                    if antinode0.x >= 0
+                        && antinode0.x < grid_width as i32
+                        && antinode0.y >= 0
+                        && antinode0.y < grid_height as i32
+                        && !antenna_grid_points.contains(&antinode0)
+                        && !antinode_grid_points.contains(&antinode0)
+                    {
+                        final_grid[antinode0.y as usize][antinode0.x as usize] = '#';
+                        antinode_grid_points.push(antinode0);
+                    }
+                    if antinode1.x >= 0
+                        && antinode1.x < grid_width as i32
+                        && antinode1.y >= 0
+                        && antinode1.y < grid_height as i32
+                        && !antenna_grid_points.contains(&antinode1)
+                        && !antinode_grid_points.contains(&antinode1)
+                    {
+                        final_grid[antinode1.y as usize][antinode1.x as usize] = '#';
+                        antinode_grid_points.push(antinode1);
+                    }
+                }
+            }
+        }
+    }
+    //println!("final_grid");
+    //for a in antenna_grid_points {
+    //    final_grid[a.y as usize][a.x as usize] = a.name;
+    //}
+    //for l in final_grid.iter() {
+    //    println!("{:?}", l);
+    //}
+    antinode_grid_points.len()
+}
 
 fn main() {
     let file_path = "../inputs/aoc_08.txt";
@@ -115,6 +181,6 @@ fn main() {
 
     let task1_solution = task1(&antenna_map, grid_height, grid_width);
     println!("task1 solution is {}", task1_solution);
-    //let task2_solution = task2(&test_values, &numbrs);
-    //println!("task2 solution is {}", task2_solution);
+    let task2_solution = task2(&antenna_map, grid_height, grid_width);
+    println!("task2 solution is {}", task2_solution);
 }
