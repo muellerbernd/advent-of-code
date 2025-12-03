@@ -4,6 +4,28 @@ fn parse_input(input: &str) -> Vec<Vec<char>> {
     input.lines().map(|l| l.chars().collect()).collect()
 }
 
+
+fn largest_subseq_of_len(bank: &Vec<char>, k: usize) -> String {
+    let n = bank.len();
+    if k >= n {
+        return bank.iter().collect::<String>();
+    }
+    let mut res: Vec<char> = Vec::with_capacity(k);
+    let mut drop = n - k;
+
+    for &c in bank {
+        while drop > 0 && !res.is_empty() && *res.last().unwrap() < c {
+            res.pop();
+            drop -= 1;
+        }
+        res.push(c);
+    }
+
+    // ensure length is exactly k
+    res.truncate(k);
+    res.iter().collect()
+}
+
 fn task1(banks: &Vec<Vec<char>>) -> u32 {
     let mut joltages = Vec::new();
     for bank in banks {
@@ -20,9 +42,15 @@ fn task1(banks: &Vec<Vec<char>>) -> u32 {
     }
     return joltages.iter().sum()
 }
-//
-// fn task2(ranges: &[(i64, i64)]) -> i64 {
-// }
+
+fn task2(banks: &Vec<Vec<char>>) -> u128 {
+    let mut joltages = Vec::new();
+    for bank in banks {
+        let best = largest_subseq_of_len(bank, 12);
+        joltages.push(best.parse::<u128>().unwrap())
+    }
+    return joltages.iter().sum()
+}
 
 fn main() {
     let file_path = "../inputs/aoc_03.txt";
@@ -31,8 +59,8 @@ fn main() {
     let parsed_input = parse_input(&raw_input);
     let task1_solution = task1(&parsed_input);
     println!("task1 solution is {}", task1_solution);
-    // let task2_solution = task2(&parsed_input);
-    // println!("task2 solution is {}", task2_solution);
+    let task2_solution = task2(&parsed_input);
+    println!("task2 solution is {}", task2_solution);
 }
 
 #[test]
@@ -43,7 +71,6 @@ fn test_input() {
     println!("parsed_input {:?}", parsed_input);
     let task1_solution = task1(&parsed_input);
     assert_eq!(task1_solution, 357);
-    // let task2_solution = task2(&parsed_input);
-    // println!("task2 solution is {}", task2_solution);
-    // assert_eq!(task2_solution, 4174379265);
+    let task2_solution = task2(&parsed_input);
+    assert_eq!(task2_solution, 3121910778619);
 }
