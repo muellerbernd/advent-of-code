@@ -4,12 +4,12 @@ use std::fs::read_to_string;
 fn parse_input(input: &str) -> VecDeque<VecDeque<u32>> {
     let dq = VecDeque::from(
         input
+            .replace(".", "0")
+            .replace("@", "1")
             .lines()
             .map(|l| {
                 VecDeque::from(
-                    l.replace(".", "0")
-                        .replace("@", "1")
-                        .chars()
+                    l.chars()
                         .map(|v| v.to_digit(10).unwrap())
                         .collect::<Vec<_>>(),
                 )
@@ -31,8 +31,31 @@ fn pad_matr(matr: &VecDeque<VecDeque<u32>>) -> VecDeque<VecDeque<u32>> {
     return pad_matr;
 }
 
-fn task1(matr: &VecDeque<VecDeque<u32>>) -> u32 {
-    return 0;
+fn task1(matr: &VecDeque<VecDeque<u32>>) -> usize {
+    let height = matr.len();
+    let width = matr.get(0).unwrap().len();
+    let mut good_rolls: Vec<(usize, usize)> = Vec::new();
+    for row_idx in 1..height - 1 {
+        for col_idx in 1..width - 1 {
+            if matr[row_idx][col_idx] == 0 {
+                continue;
+            };
+            let mut v = Vec::new();
+            v.push(matr[row_idx - 1][col_idx - 1]);
+            v.push(matr[row_idx - 1][col_idx]);
+            v.push(matr[row_idx - 1][col_idx + 1]);
+            v.push(matr[row_idx][col_idx - 1]);
+            v.push(matr[row_idx][col_idx + 1]);
+            v.push(matr[row_idx + 1][col_idx - 1]);
+            v.push(matr[row_idx + 1][col_idx]);
+            v.push(matr[row_idx + 1][col_idx + 1]);
+            let sum: u32 = v.iter().sum();
+            if sum < 4 {
+                good_rolls.push((row_idx, col_idx));
+            }
+        }
+    }
+    return good_rolls.len();
 }
 
 // fn task2(banks: &Vec<Vec<char>>) -> u128 {
@@ -45,15 +68,13 @@ fn task1(matr: &VecDeque<VecDeque<u32>>) -> u32 {
 // }
 
 fn main() {
-    // let file_path = "../inputs/aoc_04.txt";
-    let file_path = "test_input.txt";
+    let file_path = "../inputs/aoc_04.txt";
+    // let file_path = "test_input.txt";
 
     let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
     let mut parsed_input = parse_input(&raw_input);
-    println!("parsed input {:?}", parsed_input);
 
     let padded_input = pad_matr(&mut parsed_input);
-    println!("padded input {:?}", padded_input);
 
     let task1_solution = task1(&padded_input);
     println!("task1 solution is {}", task1_solution);
@@ -63,12 +84,12 @@ fn main() {
 
 #[test]
 fn test_input() {
-    // let file_path = "test_input.txt";
-    // let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
-    // let parsed_input = parse_input(&raw_input);
-    // println!("parsed_input {:?}", parsed_input);
-    // let task1_solution = task1(&parsed_input);
-    // assert_eq!(task1_solution, 13);
+    let file_path = "test_input.txt";
+    let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
+    let mut parsed_input = parse_input(&raw_input);
+    let padded_input = pad_matr(&mut parsed_input);
+    let task1_solution = task1(&padded_input);
+    assert_eq!(task1_solution, 13);
     // let task2_solution = task2(&parsed_input);
     // assert_eq!(task2_solution, 3121910778619);
 }
