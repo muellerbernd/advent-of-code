@@ -31,10 +31,10 @@ fn pad_matr(matr: &VecDeque<VecDeque<u32>>) -> VecDeque<VecDeque<u32>> {
     return pad_matr;
 }
 
-fn task1(matr: &VecDeque<VecDeque<u32>>) -> usize {
+fn get_removeable_rolls(matr: &VecDeque<VecDeque<u32>>) -> Vec<(usize, usize)> {
     let height = matr.len();
     let width = matr.get(0).unwrap().len();
-    let mut good_rolls: Vec<(usize, usize)> = Vec::new();
+    let mut removeable_rolls: Vec<(usize, usize)> = Vec::new();
     for row_idx in 1..height - 1 {
         for col_idx in 1..width - 1 {
             if matr[row_idx][col_idx] == 0 {
@@ -51,25 +51,36 @@ fn task1(matr: &VecDeque<VecDeque<u32>>) -> usize {
             v.push(matr[row_idx + 1][col_idx + 1]);
             let sum: u32 = v.iter().sum();
             if sum < 4 {
-                good_rolls.push((row_idx, col_idx));
+                removeable_rolls.push((row_idx, col_idx));
             }
         }
     }
-    return good_rolls.len();
+    return removeable_rolls;
 }
 
-// fn task2(banks: &Vec<Vec<char>>) -> u128 {
-//     let mut joltages = Vec::new();
-//     for bank in banks {
-//         let best = largest_subseq_of_len(bank, 12);
-//         joltages.push(best.parse::<u128>().unwrap())
-//     }
-//     return joltages.iter().sum()
-// }
+fn task1(matr: &VecDeque<VecDeque<u32>>) -> usize {
+    let removeable_rolls = get_removeable_rolls(matr);
+    return removeable_rolls.len();
+}
+
+fn task2(matr: &VecDeque<VecDeque<u32>>) -> usize {
+    let mut total_remove_rolls = 0;
+    let mut edit_matr = matr.clone();
+    loop {
+        let removable_rolls = get_removeable_rolls(&edit_matr);
+        if removable_rolls.len() == 0 {
+            break;
+        }
+        for (row, col) in removable_rolls.clone().into_iter() {
+            edit_matr[row][col] = 0;
+        }
+        total_remove_rolls += removable_rolls.len();
+    }
+    return total_remove_rolls;
+}
 
 fn main() {
     let file_path = "../inputs/aoc_04.txt";
-    // let file_path = "test_input.txt";
 
     let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
     let mut parsed_input = parse_input(&raw_input);
@@ -78,8 +89,8 @@ fn main() {
 
     let task1_solution = task1(&padded_input);
     println!("task1 solution is {}", task1_solution);
-    // let task2_solution = task2(&parsed_input);
-    // println!("task2 solution is {}", task2_solution);
+    let task2_solution = task2(&padded_input);
+    println!("task2 solution is {}", task2_solution);
 }
 
 #[test]
@@ -90,6 +101,6 @@ fn test_input() {
     let padded_input = pad_matr(&mut parsed_input);
     let task1_solution = task1(&padded_input);
     assert_eq!(task1_solution, 13);
-    // let task2_solution = task2(&parsed_input);
-    // assert_eq!(task2_solution, 3121910778619);
+    let task2_solution = task2(&padded_input);
+    assert_eq!(task2_solution, 43);
 }
