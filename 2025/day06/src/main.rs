@@ -49,16 +49,44 @@ fn task2(input: &str) -> i64 {
                     last_col_start = idx;
                 }
             }
-            false => (),
+            false => {
+                if idx == operators.len() - 1 {
+                    cols.push((last_col_start, idx));
+                }
+            }
         }
     }
-    println!("cols {:?}", cols);
-    return 0;
+    let mut grand_total: i64 = 0;
+    for col in cols.iter().rev() {
+        let start = col.0;
+        let end = col.1;
+        let mut r_2_l_num: Vec<String> = vec!["".to_string(); end - start + 1];
+        for i in 0..problems.len() - 1 {
+            for j in (0..problems[i].len()).rev() {
+                if j <= end && j >= start {
+                    r_2_l_num[end - j] += &problems[i][j].to_string();
+                }
+            }
+        }
+        match operators[start] {
+            '*' => {
+                grand_total += r_2_l_num
+                    .iter()
+                    .fold(1, |acc, x| acc * x.trim().parse::<i64>().unwrap())
+            }
+            '+' => {
+                grand_total += r_2_l_num
+                    .iter()
+                    .fold(0, |acc, x| acc + x.trim().parse::<i64>().unwrap())
+            }
+            _ => (),
+        }
+    }
+    return grand_total;
 }
 
 fn main() {
     let file_path = "../inputs/aoc_06.txt";
-    let file_path = "test_input.txt";
 
     let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
 
