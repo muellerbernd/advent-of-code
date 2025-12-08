@@ -19,36 +19,40 @@ fn parse_input(input: &str) -> Vec<Vec<f64>> {
 }
 
 fn task1(junction_boxes: &Vec<Vec<f64>>, n: usize) -> i64 {
-    let mut closest_dist: f64 = -1.0;
-    let mut closest_a: Vec<f64> = Vec::new();
-    let mut closest_b: Vec<f64> = Vec::new();
+    let mut dists: Vec<(f64, usize, usize)> = Vec::new();
     for (i, junctionbox) in junction_boxes.iter().enumerate() {
+        let a = junctionbox; // borrow; avoid clone if possible
         for j in i + 1..junction_boxes.len() {
-            let a = junctionbox.clone();
-            let b = junction_boxes[j].clone();
-            let dist = get_euc_dist(&a, &b).unwrap();
-            if closest_dist == -1.0 {
-                closest_dist = dist;
-                closest_a = a.clone();
-                closest_b = b.clone();
-            } else if dist < closest_dist {
-                closest_dist = dist;
-                closest_a = a.clone();
-                closest_b = b.clone();
+            let b = &junction_boxes[j];
+            if let Some(dist) = get_euc_dist(a, b) {
+                dists.push((dist, i, j));
             }
         }
     }
-    println!(
-        "dist {:?}, a {:?}, b {:?}",
-        closest_dist, closest_a, closest_b
-    );
 
-    return 0;
+    dists.sort_by(|(a, _, _), (b, _, _)| a.partial_cmp(&b).unwrap());
+    let mut circuits: Vec<usize> = (0..junction_boxes.len()).collect();
+    for (d, a, b) in &dists[..n] {
+        circuits = circuits
+            .iter()
+            .map(|n| if *n == circuits[*a] { circuits[*b] } else { *n })
+            .collect();
+    }
+    let mut circuit_counts = vec![0; junction_boxes.len()];
+    for c in circuits {
+        circuit_counts[c] += 1;
+    }
+    circuit_counts.sort();
+
+    return circuit_counts
+        .iter()
+        .rev()
+        .take(3)
+        .fold(1, |acc, v| acc * v);
 }
 
 fn main() {
-    // let file_path = "../inputs/aoc_08.txt";
-    let file_path = "test_input.txt";
+    let file_path = "../inputs/aoc_08.txt";
 
     let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
 
