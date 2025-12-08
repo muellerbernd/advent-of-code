@@ -10,6 +10,13 @@ fn get_euc_dist(a: &Vec<f64>, b: &Vec<f64>) -> Option<f64> {
     }
 }
 
+fn all_equal<T: PartialEq>(v: &[T]) -> bool {
+    match v.first() {
+        Some(first) => v.iter().all(|x| x == first),
+        None => true, // empty vector
+    }
+}
+
 fn parse_input(input: &str) -> Vec<Vec<f64>> {
     let junction_boxes: Vec<Vec<f64>> = input
         .lines()
@@ -32,7 +39,7 @@ fn task1(junction_boxes: &Vec<Vec<f64>>, n: usize) -> i64 {
 
     dists.sort_by(|(a, _, _), (b, _, _)| a.partial_cmp(&b).unwrap());
     let mut circuits: Vec<usize> = (0..junction_boxes.len()).collect();
-    for (d, a, b) in &dists[..n] {
+    for (_, a, b) in &dists[..n] {
         circuits = circuits
             .iter()
             .map(|n| if *n == circuits[*a] { circuits[*b] } else { *n })
@@ -51,6 +58,32 @@ fn task1(junction_boxes: &Vec<Vec<f64>>, n: usize) -> i64 {
         .fold(1, |acc, v| acc * v);
 }
 
+fn task2(junction_boxes: &Vec<Vec<f64>>) -> i64 {
+    let mut dists: Vec<(f64, usize, usize)> = Vec::new();
+    for (i, junctionbox) in junction_boxes.iter().enumerate() {
+        let a = junctionbox; // borrow; avoid clone if possible
+        for j in i + 1..junction_boxes.len() {
+            let b = &junction_boxes[j];
+            if let Some(dist) = get_euc_dist(a, b) {
+                dists.push((dist, i, j));
+            }
+        }
+    }
+
+    dists.sort_by(|(a, _, _), (b, _, _)| a.partial_cmp(&b).unwrap());
+    let mut circuits: Vec<usize> = (0..junction_boxes.len()).collect();
+    for (_, a, b) in dists {
+        circuits = circuits
+            .iter()
+            .map(|n| if *n == circuits[a] { circuits[b] } else { *n })
+            .collect();
+        if all_equal(&circuits) {
+            return junction_boxes[a][0] as i64 * junction_boxes[b][0] as i64;
+        }
+    }
+    return 0;
+}
+
 fn main() {
     let file_path = "../inputs/aoc_08.txt";
 
@@ -59,17 +92,26 @@ fn main() {
     let junction_boxes = parse_input(&raw_input);
     let task1_solution = task1(&junction_boxes, 1000);
     println!("task1 solution is {}", task1_solution);
-    // let task2_solution = task2(&raw_input);
-    // println!("task2 solution is {}", task2_solution);
+    let task2_solution = task2(&junction_boxes);
+    println!("task2 solution is {}", task2_solution);
 }
 
 #[test]
-fn test_input() {
+fn task01() {
     let file_path = "test_input.txt";
     let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
     let junction_boxes = parse_input(&raw_input);
     let task1_solution = task1(&junction_boxes, 10);
     assert_eq!(task1_solution, 40);
-    // let task2_solution = task2(&raw_input);
-    // assert_eq!(task2_solution, 40);
+    // let task2_solution = task2(&junction_boxes);
+    // assert_eq!(task2_solution, 25272);
+}
+
+#[test]
+fn task02() {
+    let file_path = "test_input.txt";
+    let raw_input = read_to_string(file_path).expect("Should have been able to read the file");
+    let junction_boxes = parse_input(&raw_input);
+    let task2_solution = task2(&junction_boxes);
+    assert_eq!(task2_solution, 25272);
 }
